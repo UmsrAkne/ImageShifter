@@ -23,7 +23,7 @@
         <StackPanel Grid.Row="0">
             <TextBlock Text="Enter the path to the folder containing .bmp files :" />
             <Border Height="5" />
-            <TextBox />
+            <TextBox Text="{Binding TargetDirectoryPath, UpdateSourceTrigger=PropertyChanged}" />
         </StackPanel>
 
         <StackPanel Grid.Row="1" Margin="0,10">
@@ -31,6 +31,7 @@
                 Margin="0,5"
                 Padding="50,3"
                 HorizontalAlignment="Right"
+                Command="{Binding ConvertImagesAsyncCommand}"
                 Content="Convert" />
         </StackPanel>
 
