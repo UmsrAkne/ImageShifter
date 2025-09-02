@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Mvvm.Input;
+﻿using System.Text;
+using System.Windows;
+using CommunityToolkit.Mvvm.Input;
 using ImageShifter.Core;
 using ImageShifter.Utils;
 using Prism.Mvvm;
@@ -7,8 +9,10 @@ namespace ImageShifter.ViewModels;
 
 public class MainWindowViewModel : BindableBase
 {
+    private readonly StringBuilder stringBuilder = new();
     private AppVersionInfo appVersionInfo = new();
     private string targetDirectoryPath = string.Empty;
+    private string logText = string.Empty;
 
     public string Title => appVersionInfo.GetAppNameWithVersion();
 
@@ -18,10 +22,18 @@ public class MainWindowViewModel : BindableBase
         set => SetProperty(ref targetDirectoryPath, value);
     }
 
+    public string LogText { get => logText; set => SetProperty(ref logText, value); }
+
     public AsyncRelayCommand ConvertImagesAsyncCommand => new (async () =>
     {
-        var result = await ImageConverterUtil.ConvertBmpToPngAsync(TargetDirectoryPath);
-        System.Diagnostics.Debug.WriteLine($"Total: {result.Total}(MainWindowViewModel : 18)");
-        System.Diagnostics.Debug.WriteLine($"Success: {result.SuccessCount}(MainWindowViewModel : 18)");
+        var result = await ImageConverterUtil.ConvertBmpToPngAsync(TargetDirectoryPath, log =>
+        {
+            // UIスレッドで更新
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                stringBuilder.AppendLine(log);
+                LogText = stringBuilder.ToString();
+            });
+        });
     });
 }

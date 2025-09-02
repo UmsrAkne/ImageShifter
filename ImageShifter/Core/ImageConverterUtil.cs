@@ -13,17 +13,24 @@ namespace ImageShifter.Core
         /// 全て成功した場合のみ .bmp を削除します。
         /// </summary>
         /// <param name="folderPath">対象フォルダのフルパスを入力します。</param>
+        /// <param name="onLog">ログの出力先の Action を入力します。</param>
         /// <returns>変換処理のログを返します。</returns>
         /// <exception cref="IOException">
         /// ファイルの変換に失敗した場合などにスローされます。
         /// 変換に失敗したケースが含まれる場合、bmp ファイルの削除は実行されません。
         /// </exception>
-        public static async Task<ConversionResult> ConvertBmpToPngAsync(string folderPath)
+        public static async Task<ConversionResult> ConvertBmpToPngAsync(string folderPath, Action<string> onLog = null)
         {
+            void Log(string message)
+            {
+                onLog?.Invoke($"[{DateTime.Now:HH:mm:ss}] {message}");
+            }
+
             var result = new ConversionResult();
 
             if (!Directory.Exists(folderPath))
             {
+                Log("指定されたディレクトリが存在しません。");
                 result.Errors.Add("ディレクトリが存在しません。");
                 return result;
             }
@@ -33,14 +40,20 @@ namespace ImageShifter.Core
 
             if (bmpFiles.Length == 0)
             {
+                Log("対象の .bmp ファイルが見つかりませんでした。");
                 result.Errors.Add("対象の .bmp ファイルが見つかりませんでした。");
                 return result;
             }
+
+            Log($"変換開始：{result.Total} 件");
 
             var successList = new List<string>();
 
             foreach (var bmpFile in bmpFiles)
             {
+                var fileName = Path.GetFileName(bmpFile);
+                Log($"変換中: {fileName}");
+
                 try
                 {
                     var pngPath = Path.ChangeExtension(bmpFile, ".png");
@@ -55,14 +68,12 @@ namespace ImageShifter.Core
                         bitmap.EndInit();
                         bitmap.Freeze(); // WPFで使うには必須
 
-                        // png に保存
                         using var pngStream = File.Create(pngPath);
                         var encoder = new PngBitmapEncoder();
                         encoder.Frames.Add(BitmapFrame.Create(bitmap));
                         encoder.Save(pngStream);
                     });
 
-                    // PNGのサイズ確認
                     var fi = new FileInfo(pngPath);
                     if (fi.Length == 0)
                     {
@@ -70,10 +81,12 @@ namespace ImageShifter.Core
                     }
 
                     successList.Add(bmpFile);
+                    Log($"成功: {fileName}");
                 }
                 catch (Exception ex)
                 {
-                    result.Errors.Add($"{Path.GetFileName(bmpFile)}: {ex.Message}");
+                    Log($"失敗: {fileName} → {ex.Message}");
+                    result.Errors.Add($"{fileName}: {ex.Message}");
                 }
             }
 
@@ -81,19 +94,28 @@ namespace ImageShifter.Core
 
             if (result.SuccessCount == result.Total)
             {
-                // 全件成功 → 元 .bmp を削除
+                Log("全件成功、元の .bmp を削除します…");
+
                 foreach (var bmp in successList)
                 {
                     try
                     {
                         File.Delete(bmp);
+                        Log($"削除: {Path.GetFileName(bmp)}");
                     }
                     catch (Exception ex)
                     {
                         result.Errors.Add($"{Path.GetFileName(bmp)} の削除に失敗: {ex.Message}");
+                        Log($"削除失敗: {Path.GetFileName(bmp)} → {ex.Message}");
                     }
                 }
             }
+            else
+            {
+                Log($"失敗数: {result.FailCount} 件。元の .bmp は削除しません。");
+            }
+
+            Log("変換完了。");
 
             return result;
         }

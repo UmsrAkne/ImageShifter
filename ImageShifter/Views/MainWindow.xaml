@@ -39,7 +39,7 @@
             Grid.Row="2"
             BorderBrush="DimGray"
             BorderThickness="1">
-            <TextBlock />
+            <TextBlock Text="{Binding LogText}" />
         </Border>
     </Grid>
 </Window>
