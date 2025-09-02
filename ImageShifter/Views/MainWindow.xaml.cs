@@ -1,4 +1,6 @@
-﻿namespace ImageShifter.Views
+﻿using System.Windows.Controls;
+
+namespace ImageShifter.Views
 {
     /// <summary>
     ///     Interaction logic for MainWindow.xaml
@@ -8,6 +10,11 @@
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void LogTextBox_TextChanged(object sender, TextChangedEventArgs textChangedEventArgs)
+        {
+            LogScrollViewer.ScrollToEnd();
         }
     }
 }

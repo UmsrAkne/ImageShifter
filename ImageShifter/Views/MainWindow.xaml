@@ -39,8 +39,11 @@
             Grid.Row="2"
             BorderBrush="DimGray"
             BorderThickness="1">
-            <ScrollViewer>
-                <TextBlock Text="{Binding LogText}" TextWrapping="Wrap" />
+            <ScrollViewer x:Name="LogScrollViewer">
+                <TextBox
+                    Text="{Binding LogText}"
+                    TextChanged="LogTextBox_TextChanged"
+                    TextWrapping="Wrap" />
             </ScrollViewer>
         </Border>
     </Grid>
