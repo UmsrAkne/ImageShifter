@@ -19,7 +19,7 @@ namespace ImageShifter.Core
         /// ファイルの変換に失敗した場合などにスローされます。
         /// 変換に失敗したケースが含まれる場合、bmp ファイルの削除は実行されません。
         /// </exception>
-        public static async Task<ConversionResult> ConvertBmpToPngAsync(string folderPath, Action<string> onLog = null)
+        public static async Task<ConversionResult> ConvertBmpToPngAsync(string folderPath, Func<string, Task> onLog = null)
         {
             void Log(string message)
             {

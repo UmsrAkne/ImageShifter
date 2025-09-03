@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.IO;
+using System.Text;
 using System.Windows;
 using CommunityToolkit.Mvvm.Input;
 using ImageShifter.Core;
@@ -27,7 +28,7 @@ namespace ImageShifter.ViewModels
 
         public AsyncRelayCommand ConvertImagesAsyncCommand => new (async () =>
         {
-            await ImageConverterUtil.ConvertBmpToPngAsync(TargetDirectoryPath, log =>
+            await ImageConverterUtil.ConvertBmpToPngAsync(TargetDirectoryPath, async log =>
             {
                 // UIスレッドで更新
                 Application.Current.Dispatcher.Invoke(() =>
@@ -35,6 +36,9 @@ namespace ImageShifter.ViewModels
                     stringBuilder.AppendLine(log);
                     LogText = stringBuilder.ToString();
                 });
+
+                await using var writer = new StreamWriter("log.txt", true, Encoding.UTF8);
+                await writer.WriteLineAsync(log);
             });
         });
     }
