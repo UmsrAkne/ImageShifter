@@ -15,6 +15,7 @@ namespace ImageShifter.ViewModels
         private readonly AppVersionInfo appVersionInfo = new();
         private string targetDirectoryPath = string.Empty;
         private string logText = string.Empty;
+        private bool isDeleteOriginalFilesEnabled = true;
 
         public string Title => appVersionInfo.GetAppNameWithVersion();
 
@@ -26,9 +27,16 @@ namespace ImageShifter.ViewModels
 
         public string LogText { get => logText; set => SetProperty(ref logText, value); }
 
+        public bool IsDeleteOriginalFilesEnabled
+        {
+            get => isDeleteOriginalFilesEnabled;
+            set => SetProperty(ref isDeleteOriginalFilesEnabled, value);
+        }
+
         public AsyncRelayCommand ConvertImagesAsyncCommand => new (async () =>
         {
-            await ImageConverterUtil.ConvertBmpToPngAsync(TargetDirectoryPath, async log =>
+            await ImageConverterUtil.ConvertBmpToPngAsync(
+                TargetDirectoryPath, IsDeleteOriginalFilesEnabled, async log =>
             {
                 // UIスレッドで更新
                 Application.Current.Dispatcher.Invoke(() =>
