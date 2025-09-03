@@ -5,35 +5,37 @@ using ImageShifter.Core;
 using ImageShifter.Utils;
 using Prism.Mvvm;
 
-namespace ImageShifter.ViewModels;
-
-public class MainWindowViewModel : BindableBase
+namespace ImageShifter.ViewModels
 {
-    private readonly StringBuilder stringBuilder = new();
-    private AppVersionInfo appVersionInfo = new();
-    private string targetDirectoryPath = string.Empty;
-    private string logText = string.Empty;
-
-    public string Title => appVersionInfo.GetAppNameWithVersion();
-
-    public string TargetDirectoryPath
+    // ReSharper disable once ClassNeverInstantiated.Global
+    public class MainWindowViewModel : BindableBase
     {
-        get => targetDirectoryPath;
-        set => SetProperty(ref targetDirectoryPath, value);
-    }
+        private readonly StringBuilder stringBuilder = new();
+        private readonly AppVersionInfo appVersionInfo = new();
+        private string targetDirectoryPath = string.Empty;
+        private string logText = string.Empty;
 
-    public string LogText { get => logText; set => SetProperty(ref logText, value); }
+        public string Title => appVersionInfo.GetAppNameWithVersion();
 
-    public AsyncRelayCommand ConvertImagesAsyncCommand => new (async () =>
-    {
-        var result = await ImageConverterUtil.ConvertBmpToPngAsync(TargetDirectoryPath, log =>
+        public string TargetDirectoryPath
         {
-            // UIスレッドで更新
-            Application.Current.Dispatcher.Invoke(() =>
+            get => targetDirectoryPath;
+            set => SetProperty(ref targetDirectoryPath, value);
+        }
+
+        public string LogText { get => logText; set => SetProperty(ref logText, value); }
+
+        public AsyncRelayCommand ConvertImagesAsyncCommand => new (async () =>
+        {
+            await ImageConverterUtil.ConvertBmpToPngAsync(TargetDirectoryPath, log =>
             {
-                stringBuilder.AppendLine(log);
-                LogText = stringBuilder.ToString();
+                // UIスレッドで更新
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    stringBuilder.AppendLine(log);
+                    LogText = stringBuilder.ToString();
+                });
             });
         });
-    });
+    }
 }
