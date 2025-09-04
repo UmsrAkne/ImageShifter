@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.Input;
 using ImageShifter.Core;
@@ -16,6 +17,7 @@ namespace ImageShifter.ViewModels
         private string targetDirectoryPath = string.Empty;
         private string logText = string.Empty;
         private bool isDeleteOriginalFilesEnabled = true;
+        private bool isConvertButtonEnabled = true;
 
         public string Title => appVersionInfo.GetAppNameWithVersion();
 
@@ -33,21 +35,42 @@ namespace ImageShifter.ViewModels
             set => SetProperty(ref isDeleteOriginalFilesEnabled, value);
         }
 
+        public bool IsConvertButtonEnabled
+        {
+            get => isConvertButtonEnabled;
+            set => SetProperty(ref isConvertButtonEnabled, value);
+        }
+
         public AsyncRelayCommand ConvertImagesAsyncCommand => new (async () =>
         {
-            await ImageConverterUtil.ConvertBmpToPngAsync(
-                TargetDirectoryPath, IsDeleteOriginalFilesEnabled, async log =>
-            {
-                // UIスレッドで更新
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    stringBuilder.AppendLine(log);
-                    LogText = stringBuilder.ToString();
-                });
+            IsConvertButtonEnabled = false;
 
-                await using var writer = new StreamWriter("log.txt", true, Encoding.UTF8);
-                await writer.WriteLineAsync(log);
-            });
+            try
+            {
+                await ImageConverterUtil.ConvertBmpToPngAsync(
+                    TargetDirectoryPath, IsDeleteOriginalFilesEnabled, async log =>
+                    {
+                        // UIスレッドで更新
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            stringBuilder.AppendLine(log);
+                            LogText = stringBuilder.ToString();
+                        });
+
+                        await SaveLogEntryAsync(log, "log.txt");
+                        await SaveLogEntryAsync(log, Path.Combine(TargetDirectoryPath, "log.txt"));
+                    });
+            }
+            finally
+            {
+                IsConvertButtonEnabled = true;
+            }
         });
+
+        private async Task SaveLogEntryAsync(string log, string path)
+        {
+            await using var writer = new StreamWriter(path, true, Encoding.UTF8);
+            await writer.WriteLineAsync(log);
+        }
     }
 }

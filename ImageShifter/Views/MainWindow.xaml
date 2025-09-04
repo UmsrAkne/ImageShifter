@@ -50,7 +50,8 @@
                 Padding="50,3"
                 HorizontalAlignment="Right"
                 Command="{Binding ConvertImagesAsyncCommand}"
-                Content="Convert" />
+                Content="Convert"
+                IsEnabled="{Binding IsConvertButtonEnabled}" />
         </Grid>
 
         <Border
