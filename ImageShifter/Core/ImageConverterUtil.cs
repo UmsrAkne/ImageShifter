@@ -30,6 +30,8 @@ namespace ImageShifter.Core
 
             var result = new ConversionResult();
 
+            Log("処理を開始します…------------------------------");
+
             if (!Directory.Exists(folderPath))
             {
                 Log("指定されたディレクトリが存在しません。");
@@ -47,7 +49,9 @@ namespace ImageShifter.Core
                 return result;
             }
 
-            Log($"変換開始：{result.Total} 件");
+            Log($"対象ディレクトリ: {folderPath}");
+            Log($"対象ファイル数: {result.Total} 件");
+            Log("変換開始");
 
             var successList = new List<string>();
 
