@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.Input;
 using ImageShifter.Core;
@@ -37,17 +38,23 @@ namespace ImageShifter.ViewModels
         {
             await ImageConverterUtil.ConvertBmpToPngAsync(
                 TargetDirectoryPath, IsDeleteOriginalFilesEnabled, async log =>
-            {
-                // UIスレッドで更新
+                {
+                    // UIスレッドで更新
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     stringBuilder.AppendLine(log);
                     LogText = stringBuilder.ToString();
                 });
 
-                await using var writer = new StreamWriter("log.txt", true, Encoding.UTF8);
-                await writer.WriteLineAsync(log);
-            });
+                await SaveLogEntryAsync(log, "log.txt");
+                await SaveLogEntryAsync(log, Path.Combine(TargetDirectoryPath, "log.txt"));
+                });
         });
+
+        private async Task SaveLogEntryAsync(string log, string path)
+        {
+            await using var writer = new StreamWriter(path, true, Encoding.UTF8);
+            await writer.WriteLineAsync(log);
+        }
     }
 }
