@@ -1,0 +1,31 @@
+####################################################################################################
+Package:CommunityToolkit.Mvvm
+Version:8.4.0
+project URL:https://github.com/CommunityToolkit/dotnet
+Description:This package includes a .NET MVVM library with helpers such as:
+      - ObservableObject: a base class for objects implementing the INotifyPropertyChanged interface.
+      - ObservableRecipient: a base class for observable objects with support for the IMessenger service.
+      - ObservableValidator: a base class for objects implementing the INotifyDataErrorInfo interface.
+      - RelayCommand: a simple delegate command implementing the ICommand interface.
+      - AsyncRelayCommand: a delegate command supporting asynchronous operations and cancellation.
+      - WeakReferenceMessenger: a messaging system to exchange messages through different loosely-coupled objects.
+      - StrongReferenceMessenger: a high-performance messaging system that trades weak references for speed.
+      - Ioc: a helper class to configure dependency injection service containers.
+licenseUrl:https://licenses.nuget.org/MIT
+license Type:MIT
+
+####################################################################################################
+Package: Prism.DryIoc  
+Version: 8.1.97  
+License: Prism Community License  
+License URL: https://cdn.prismlibrary.com/downloads/prism_license.pdf  
+Notes: Free to use under the Community License terms if annual gross revenue is under $1M and no more than $3M in external funding has been received.
+
+####################################################################################################
+Package:StyleCop.Analyzers
+Version:1.1.118
+project URL:https://github.com/DotNetAnalyzers/StyleCopAnalyzers
+Description:An implementation of StyleCop's rules using Roslyn analyzers and code fixes
+licenseUrl:https://licenses.nuget.org/Apache-2.0
+license Type:Apache-2.0
+
