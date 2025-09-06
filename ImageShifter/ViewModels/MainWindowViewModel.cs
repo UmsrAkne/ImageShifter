@@ -51,7 +51,7 @@ namespace ImageShifter.ViewModels
                     TargetDirectoryPath, IsDeleteOriginalFilesEnabled, async log =>
                     {
                         // UIスレッドで更新
-                        Application.Current.Dispatcher.Invoke(() =>
+                        await Application.Current.Dispatcher.InvokeAsync(() =>
                         {
                             stringBuilder.AppendLine(log);
                             LogText = stringBuilder.ToString();
