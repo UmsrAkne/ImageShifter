@@ -90,11 +90,11 @@ namespace ImageShifter.Core
                     }
 
                     successList.Add(bmpFile);
-                    Log($"成功: {fileName}");
+                    Log($"成功　: {fileName}");
                 }
                 catch (Exception ex)
                 {
-                    Log($"失敗: {fileName} → {ex.Message}");
+                    Log($"失敗　: {fileName} → {ex.Message}");
                     result.Errors.Add($"{fileName}: {ex.Message}");
                 }
             }
