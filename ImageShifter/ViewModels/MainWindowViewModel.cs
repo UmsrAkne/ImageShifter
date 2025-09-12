@@ -48,7 +48,9 @@ namespace ImageShifter.ViewModels
             try
             {
                 await ImageConverterUtil.ConvertBmpToPngAsync(
-                    TargetDirectoryPath, IsDeleteOriginalFilesEnabled, async log =>
+                    TargetDirectoryPath,
+                    IsDeleteOriginalFilesEnabled,
+                    async log =>
                     {
                         // UIスレッドで更新
                         await Application.Current.Dispatcher.InvokeAsync(() =>
@@ -59,7 +61,7 @@ namespace ImageShifter.ViewModels
 
                         await SaveLogEntryAsync(log, "log.txt");
                         await SaveLogEntryAsync(log, Path.Combine(TargetDirectoryPath, "log.txt"));
-                    });
+                    }, appVersionInfo);
             }
             finally
             {
