@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
+using ImageShifter.Utils;
 
 namespace ImageShifter.Core
 {
@@ -15,13 +16,14 @@ namespace ImageShifter.Core
         /// <param name="folderPath">対象フォルダのフルパスを入力します。</param>
         /// <param name="deleteOriginalFiles">変換完了後、オリジナルファイルを削除するかどうかを設定します。</param>
         /// <param name="onLog">ログの出力先の Action を入力します。</param>
+        /// <param name="versionInfo">ログに記録するバージョンを出力するためのインスタンスを入力します。</param>
         /// <returns>変換処理のログを返します。</returns>
         /// <exception cref="IOException">
         /// ファイルの変換に失敗した場合などにスローされます。
         /// 変換に失敗したケースが含まれる場合、bmp ファイルの削除は実行されません。
         /// </exception>
         public static async Task<ConversionResult> ConvertBmpToPngAsync(
-            string folderPath, bool deleteOriginalFiles, Func<string, Task> onLog = null)
+            string folderPath, bool deleteOriginalFiles, Func<string, Task> onLog = null, AppVersionInfo versionInfo = null)
         {
             void Log(string message)
             {
@@ -31,6 +33,7 @@ namespace ImageShifter.Core
             var result = new ConversionResult();
 
             Log("処理を開始します…------------------------------");
+            Log($"App version : {versionInfo?.GetAppNameWithVersion()}");
 
             if (!Directory.Exists(folderPath))
             {
