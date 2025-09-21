@@ -9,35 +9,25 @@ namespace ImageShifter.Core
 {
     public static class ImageConverterUtil
     {
-        /// <summary>
-        /// 指定ディレクトリ内の .bmp を同名の .png に非同期変換。
-        /// 全て成功した場合のみ .bmp を削除します。
-        /// </summary>
-        /// <param name="folderPath">対象フォルダのフルパスを入力します。</param>
-        /// <param name="deleteOriginalFiles">変換完了後、オリジナルファイルを削除するかどうかを設定します。</param>
-        /// <param name="onLog">ログの出力先の Action を入力します。</param>
-        /// <param name="versionInfo">ログに記録するバージョンを出力するためのインスタンスを入力します。</param>
-        /// <returns>変換処理のログを返します。</returns>
-        /// <exception cref="IOException">
-        /// ファイルの変換に失敗した場合などにスローされます。
-        /// 変換に失敗したケースが含まれる場合、bmp ファイルの削除は実行されません。
-        /// </exception>
         public static async Task<ConversionResult> ConvertBmpToPngAsync(
-            string folderPath, bool deleteOriginalFiles, Func<string, Task> onLog = null, AppVersionInfo versionInfo = null)
+            string folderPath, bool deleteOriginalFiles, Func<string, Task> onLog = null,  Action<int, int> onProgress = null, AppVersionInfo versionInfo = null)
         {
-            void Log(string message)
+            async Task Log(string message)
             {
-                onLog?.Invoke($"[{DateTime.Now:HH:mm:ss}] {message}");
+                if (onLog != null)
+                {
+                    await onLog.Invoke($"[{DateTime.Now:HH:mm:ss}] {message}");
+                }
             }
 
             var result = new ConversionResult();
 
-            Log("処理を開始します…------------------------------");
-            Log($"App version : {versionInfo?.GetAppNameWithVersion()}");
+            await Log("処理を開始します…------------------------------");
+            await Log($"App version : {versionInfo?.GetAppNameWithVersion()}");
 
             if (!Directory.Exists(folderPath))
             {
-                Log("指定されたディレクトリが存在しません。");
+                await Log("指定されたディレクトリが存在しません。");
                 result.Errors.Add("ディレクトリが存在しません。");
                 return result;
             }
@@ -47,21 +37,23 @@ namespace ImageShifter.Core
 
             if (bmpFiles.Length == 0)
             {
-                Log("対象の .bmp ファイルが見つかりませんでした。");
+                await Log("対象の .bmp ファイルが見つかりませんでした。");
                 result.Errors.Add("対象の .bmp ファイルが見つかりませんでした。");
                 return result;
             }
 
-            Log($"対象ディレクトリ: {folderPath}");
-            Log($"対象ファイル数: {result.Total} 件");
-            Log("変換開始");
+            await Log($"対象ディレクトリ: {folderPath}");
+            await Log($"対象ファイル数: {result.Total} 件");
+            await Log("変換開始");
 
             var successList = new List<string>();
+            var totalProgressCount = deleteOriginalFiles ? bmpFiles.Length * 2 : bmpFiles.Length;
+            var progressCount = 0;
 
             foreach (var bmpFile in bmpFiles)
             {
                 var fileName = Path.GetFileName(bmpFile);
-                Log($"変換中: {fileName}");
+                await Log($"変換中: {fileName}");
 
                 try
                 {
@@ -90,13 +82,15 @@ namespace ImageShifter.Core
                     }
 
                     successList.Add(bmpFile);
-                    Log($"成功　: {fileName}");
+                    await Log($"成功　: {fileName}");
                 }
                 catch (Exception ex)
                 {
-                    Log($"失敗　: {fileName} → {ex.Message}");
+                    await Log($"失敗　: {fileName} → {ex.Message}");
                     result.Errors.Add($"{fileName}: {ex.Message}");
                 }
+
+                onProgress?.Invoke(++progressCount, totalProgressCount);
             }
 
             result.SuccessCount = successList.Count;
@@ -104,35 +98,44 @@ namespace ImageShifter.Core
             var isSuccess = result.SuccessCount == result.Total;
             if (!deleteOriginalFiles)
             {
-                Log(isSuccess ? "全件変換に成功しました" : $"失敗数: {result.FailCount} 件");
-                Log("変換完了");
+                await Log(isSuccess ? "全件変換に成功しました" : $"失敗数: {result.FailCount} 件");
+                await Log("変換完了");
                 return result;
             }
 
             if (isSuccess)
             {
-                Log("全件成功、元の .bmp を削除します…");
+                await Log("全件成功、元の .bmp を削除します…");
+
+                var deleteCount = 0;
 
                 foreach (var bmp in successList)
                 {
                     try
                     {
                         File.Delete(bmp);
-                        Log($"削除: {Path.GetFileName(bmp)}");
+                        deleteCount++;
+                        await Log($"削除: {Path.GetFileName(bmp)}");
                     }
                     catch (Exception ex)
                     {
                         result.Errors.Add($"{Path.GetFileName(bmp)} の削除に失敗: {ex.Message}");
-                        Log($"削除失敗: {Path.GetFileName(bmp)} → {ex.Message}");
+                        await Log($"削除失敗: {Path.GetFileName(bmp)} → {ex.Message}");
                     }
+
+                    onProgress?.Invoke(++progressCount, totalProgressCount);
                 }
+
+                await Log($"削除対象：　{result.SuccessCount} 件");
+                await Log($"削除ファイル数：　{deleteCount} 件");
+                await Log("削除処理を完了");
             }
             else
             {
-                Log($"失敗数: {result.FailCount} 件。元の .bmp は削除しません。");
+                await Log($"失敗数: {result.FailCount} 件。元の .bmp は削除しません。");
             }
 
-            Log("変換完了。");
+            await Log("変換完了。");
 
             return result;
         }

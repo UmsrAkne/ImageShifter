@@ -18,6 +18,7 @@ namespace ImageShifter.ViewModels
         private string logText = string.Empty;
         private bool isDeleteOriginalFilesEnabled = true;
         private bool isConvertButtonEnabled = true;
+        private int progressValue;
 
         public string Title => appVersionInfo.GetAppNameWithVersion();
 
@@ -41,6 +42,12 @@ namespace ImageShifter.ViewModels
             set => SetProperty(ref isConvertButtonEnabled, value);
         }
 
+        public int ProgressValue
+        {
+            get => progressValue;
+            set => SetProperty(ref progressValue, value);
+        }
+
         public AsyncRelayCommand ConvertImagesAsyncCommand => new (async () =>
         {
             IsConvertButtonEnabled = false;
@@ -61,7 +68,12 @@ namespace ImageShifter.ViewModels
 
                         await SaveLogEntryAsync(log, "log.txt");
                         await SaveLogEntryAsync(log, Path.Combine(TargetDirectoryPath, "log.txt"));
-                    }, appVersionInfo);
+                    },
+                    (done, total) =>
+                    {
+                        Application.Current.Dispatcher.InvokeAsync(() => ProgressValue = total == 0 ? 0 : done * 100 / total);
+                    },
+                    appVersionInfo);
             }
             finally
             {
