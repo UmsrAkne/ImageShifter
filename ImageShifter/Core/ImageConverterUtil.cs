@@ -10,7 +10,7 @@ namespace ImageShifter.Core
     public static class ImageConverterUtil
     {
         public static async Task<ConversionResult> ConvertBmpToPngAsync(
-            string folderPath, bool deleteOriginalFiles, Func<string, Task> onLog = null, AppVersionInfo versionInfo = null)
+            string folderPath, bool deleteOriginalFiles, Func<string, Task> onLog = null,  Action<int, int> onProgress = null, AppVersionInfo versionInfo = null)
         {
             async Task Log(string message)
             {
@@ -47,6 +47,8 @@ namespace ImageShifter.Core
             await Log("変換開始");
 
             var successList = new List<string>();
+            var totalProgressCount = deleteOriginalFiles ? bmpFiles.Length * 2 : bmpFiles.Length;
+            var progressCount = 0;
 
             foreach (var bmpFile in bmpFiles)
             {
@@ -87,6 +89,8 @@ namespace ImageShifter.Core
                     await Log($"失敗　: {fileName} → {ex.Message}");
                     result.Errors.Add($"{fileName}: {ex.Message}");
                 }
+
+                onProgress?.Invoke(++progressCount, totalProgressCount);
             }
 
             result.SuccessCount = successList.Count;
@@ -118,6 +122,8 @@ namespace ImageShifter.Core
                         result.Errors.Add($"{Path.GetFileName(bmp)} の削除に失敗: {ex.Message}");
                         await Log($"削除失敗: {Path.GetFileName(bmp)} → {ex.Message}");
                     }
+
+                    onProgress?.Invoke(++progressCount, totalProgressCount);
                 }
 
                 await Log($"削除対象：　{result.SuccessCount} 件");
