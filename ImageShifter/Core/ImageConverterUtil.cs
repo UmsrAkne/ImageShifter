@@ -103,11 +103,14 @@ namespace ImageShifter.Core
             {
                 await Log("全件成功、元の .bmp を削除します…");
 
+                var deleteCount = 0;
+
                 foreach (var bmp in successList)
                 {
                     try
                     {
                         File.Delete(bmp);
+                        deleteCount++;
                         await Log($"削除: {Path.GetFileName(bmp)}");
                     }
                     catch (Exception ex)
@@ -116,6 +119,10 @@ namespace ImageShifter.Core
                         await Log($"削除失敗: {Path.GetFileName(bmp)} → {ex.Message}");
                     }
                 }
+
+                await Log($"削除対象：　{result.SuccessCount} 件");
+                await Log($"削除ファイル数：　{deleteCount} 件");
+                await Log("削除処理を完了");
             }
             else
             {
