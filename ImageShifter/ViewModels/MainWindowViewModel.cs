@@ -19,8 +19,11 @@ namespace ImageShifter.ViewModels
         private bool isDeleteOriginalFilesEnabled = true;
         private bool isConvertButtonEnabled = true;
         private int progressValue;
+        private bool processing;
 
-        public string Title => appVersionInfo.GetAppNameWithVersion();
+        public string Title => Processing
+            ? "[Processing]" + appVersionInfo.GetAppNameWithVersion()
+            : appVersionInfo.GetAppNameWithVersion();
 
         public string TargetDirectoryPath
         {
@@ -51,6 +54,7 @@ namespace ImageShifter.ViewModels
         public AsyncRelayCommand ConvertImagesAsyncCommand => new (async () =>
         {
             IsConvertButtonEnabled = false;
+            Processing = true;
 
             try
             {
@@ -78,8 +82,21 @@ namespace ImageShifter.ViewModels
             finally
             {
                 IsConvertButtonEnabled = true;
+                Processing = false;
             }
         });
+
+        private bool Processing
+        {
+            get => processing;
+            set
+            {
+                if (SetProperty(ref processing, value))
+                {
+                    RaisePropertyChanged(nameof(Title));
+                }
+            }
+        }
 
         private async Task SaveLogEntryAsync(string log, string path)
         {
