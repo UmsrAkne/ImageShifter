@@ -48,12 +48,48 @@
             <Button
                 Grid.Column="1"
                 Margin="0,5"
-                Padding="50,3"
                 HorizontalAlignment="Right"
                 Command="{Binding ConvertImagesAsyncCommand}"
                 Content="Convert"
-                IsEnabled="{Binding IsConvertButtonEnabled}" />
-        </Grid>
+                IsEnabled="{Binding IsConvertButtonEnabled}">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Padding="40,3"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8"
+                                Opacity="1">
+                            <ContentPresenter
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                RecognizesAccessKey="True"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+
+                            <!-- マウスオーバー時：薄緑 -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#CCFFCC"/>
+                            </Trigger>
+
+                            <!-- 押下時：やや濃い緑 -->
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#99FF99"/>
+                            </Trigger>
+
+                            <!-- 無効時：半透明に -->
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+
+                <!-- 通常時の背景色（お好みで） -->
+                <Button.Background>White</Button.Background>
+            </Button>        </Grid>
 
         <Border
             Grid.Row="2"
