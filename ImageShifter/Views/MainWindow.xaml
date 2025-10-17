@@ -54,33 +54,34 @@
                 IsEnabled="{Binding IsConvertButtonEnabled}">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="border"
-                                Padding="40,3"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8"
-                                Opacity="1">
+                        <Border
+                            x:Name="border"
+                            Padding="40,3"
+                            Background="WhiteSmoke"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="8"
+                            Opacity="1">
                             <ContentPresenter
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                RecognizesAccessKey="True"/>
+                                RecognizesAccessKey="True" />
                         </Border>
                         <ControlTemplate.Triggers>
 
                             <!-- マウスオーバー時：薄緑 -->
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#CCFFCC"/>
+                                <Setter TargetName="border" Property="Background" Value="#CCFFCC" />
                             </Trigger>
 
                             <!-- 押下時：やや濃い緑 -->
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#99FF99"/>
+                                <Setter TargetName="border" Property="Background" Value="#99FF99" />
                             </Trigger>
 
                             <!-- 無効時：半透明に -->
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                                <Setter TargetName="border" Property="Opacity" Value="0.5" />
                             </Trigger>
 
                         </ControlTemplate.Triggers>
@@ -89,7 +90,8 @@
 
                 <!-- 通常時の背景色（お好みで） -->
                 <Button.Background>White</Button.Background>
-            </Button>        </Grid>
+            </Button>
+        </Grid>
 
         <Border
             Grid.Row="2"
