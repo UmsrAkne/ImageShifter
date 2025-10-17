@@ -57,7 +57,7 @@
                         <Border
                             x:Name="border"
                             Padding="40,3"
-                            Background="{TemplateBinding Background}"
+                            Background="WhiteSmoke"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="8"
