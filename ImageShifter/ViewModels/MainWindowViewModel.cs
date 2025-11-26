@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -70,7 +71,10 @@ namespace ImageShifter.ViewModels
                             LogText = stringBuilder.ToString();
                         });
 
-                        await SaveLogEntryAsync(log, "log.txt");
+                        var baseDirectoryPath = AppDomain.CurrentDomain.BaseDirectory;
+                        var logFilePath = Path.Combine(baseDirectoryPath, "log.txt");
+
+                        await SaveLogEntryAsync(log, logFilePath);
                         await SaveLogEntryAsync(log, Path.Combine(TargetDirectoryPath, "log.txt"));
                     },
                     (done, total) =>
