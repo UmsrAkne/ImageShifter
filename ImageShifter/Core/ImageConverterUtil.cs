@@ -53,7 +53,6 @@ namespace ImageShifter.Core
             foreach (var bmpFile in bmpFiles)
             {
                 var fileName = Path.GetFileName(bmpFile);
-                await Log($"変換中: {fileName}");
 
                 try
                 {
@@ -82,7 +81,6 @@ namespace ImageShifter.Core
                     }
 
                     successList.Add(bmpFile);
-                    await Log($"成功　: {fileName}");
                 }
                 catch (Exception ex)
                 {
@@ -115,7 +113,6 @@ namespace ImageShifter.Core
                     {
                         File.Delete(bmp);
                         deleteCount++;
-                        await Log($"削除: {Path.GetFileName(bmp)}");
                     }
                     catch (Exception ex)
                     {
