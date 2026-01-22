@@ -47,7 +47,7 @@ namespace ImageShifter.Core
             await Log("変換開始");
 
             var successList = new List<string>();
-            var totalProgressCount = deleteOriginalFiles ? bmpFiles.Length * 2 : bmpFiles.Length;
+            var totalProgressCount = deleteOriginalFiles ? bmpFiles.Length + 1 : bmpFiles.Length;
             var progressCount = 0;
 
             foreach (var bmpFile in bmpFiles)
@@ -119,10 +119,9 @@ namespace ImageShifter.Core
                         result.Errors.Add($"{Path.GetFileName(bmp)} の削除に失敗: {ex.Message}");
                         await Log($"削除失敗: {Path.GetFileName(bmp)} → {ex.Message}");
                     }
-
-                    onProgress?.Invoke(++progressCount, totalProgressCount);
                 }
 
+                onProgress?.Invoke(++progressCount, totalProgressCount);
                 await Log($"削除対象：　{result.SuccessCount} 件");
                 await Log($"削除ファイル数：　{deleteCount} 件");
                 await Log("削除処理を完了");
