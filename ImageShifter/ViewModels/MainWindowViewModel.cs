@@ -15,7 +15,7 @@ namespace ImageShifter.ViewModels
     {
         private readonly StringBuilder stringBuilder = new();
         private readonly AppVersionInfo appVersionInfo = new();
-        private string targetDirectoryPath = string.Empty;
+        private string targetDirectoryPaths = string.Empty;
         private string logText = string.Empty;
         private bool isDeleteOriginalFilesEnabled = true;
         private bool isConvertButtonEnabled = true;
@@ -26,10 +26,10 @@ namespace ImageShifter.ViewModels
             ? "[Processing]" + appVersionInfo.GetAppNameWithVersion()
             : appVersionInfo.GetAppNameWithVersion();
 
-        public string TargetDirectoryPath
+        public string TargetDirectoryPaths
         {
-            get => targetDirectoryPath;
-            set => SetProperty(ref targetDirectoryPath, value);
+            get => targetDirectoryPaths;
+            set => SetProperty(ref targetDirectoryPaths, value);
         }
 
         public string LogText { get => logText; set => SetProperty(ref logText, value); }
@@ -60,7 +60,7 @@ namespace ImageShifter.ViewModels
             try
             {
                 await ImageConverterUtil.ConvertBmpToPngAsync(
-                    TargetDirectoryPath,
+                    TargetDirectoryPaths,
                     IsDeleteOriginalFilesEnabled,
                     async log =>
                     {
@@ -75,7 +75,7 @@ namespace ImageShifter.ViewModels
                         var logFilePath = Path.Combine(baseDirectoryPath, "log.txt");
 
                         await SaveLogEntryAsync(log, logFilePath);
-                        await SaveLogEntryAsync(log, Path.Combine(TargetDirectoryPath, "log.txt"));
+                        await SaveLogEntryAsync(log, Path.Combine(TargetDirectoryPaths, "log.txt"));
                     },
                     (done, total) =>
                     {

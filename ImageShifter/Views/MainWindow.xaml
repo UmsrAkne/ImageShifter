@@ -11,6 +11,9 @@
     Height="480"
     d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
     prism:ViewModelLocator.AutoWireViewModel="True"
+    AllowDrop="True"
+    Drop="Window_Drop"
+    PreviewDragOver="Window_PreviewDragOver"
     mc:Ignorable="d">
 
     <Grid Margin="5">
@@ -27,7 +30,7 @@
             <TextBox
                 Height="60"
                 AcceptsReturn="True"
-                Text="{Binding TargetDirectoryPath, UpdateSourceTrigger=PropertyChanged}"
+                Text="{Binding TargetDirectoryPaths, UpdateSourceTrigger=PropertyChanged}"
                 VerticalScrollBarVisibility="Auto" />
         </StackPanel>
 
