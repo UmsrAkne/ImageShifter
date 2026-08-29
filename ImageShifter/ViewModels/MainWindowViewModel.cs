@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -54,34 +55,81 @@ namespace ImageShifter.ViewModels
 
         public AsyncRelayCommand ConvertImagesAsyncCommand => new (async () =>
         {
+            var paths = TargetDirectoryPaths?
+                .Split(new[] { "\r\n", "\r", "\n", }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(p => p.Trim())
+                .Where(p => !string.IsNullOrWhiteSpace(p))
+                .Distinct() // 必要に応じて重複を除外
+                .ToArray() ?? Array.Empty<string>();
+
+            if (paths.Length == 0)
+            {
+                return;
+            }
+
             IsConvertButtonEnabled = false;
             Processing = true;
 
             try
             {
-                await ImageConverterUtil.ConvertBmpToPngAsync(
-                    TargetDirectoryPaths,
-                    IsDeleteOriginalFilesEnabled,
-                    async log =>
+                var baseDirectoryPath = AppDomain.CurrentDomain.BaseDirectory;
+                var appLogFilePath = Path.Combine(baseDirectoryPath, "log.txt");
+
+                foreach (var targetPath in paths)
+                {
+                    // 存在しないディレクトリのガード
+                    if (!Directory.Exists(targetPath))
                     {
-                        // UIスレッドで更新
+                        var errorMsg = $"[スキップ] ディレクトリが存在しません: {targetPath}";
                         await Application.Current.Dispatcher.InvokeAsync(() =>
                         {
-                            stringBuilder.AppendLine(log);
+                            stringBuilder.AppendLine(errorMsg);
                             LogText = stringBuilder.ToString();
                         });
+                        await SaveLogEntryAsync(errorMsg, appLogFilePath);
+                        continue;
+                    }
 
-                        var baseDirectoryPath = AppDomain.CurrentDomain.BaseDirectory;
-                        var logFilePath = Path.Combine(baseDirectoryPath, "log.txt");
-
-                        await SaveLogEntryAsync(log, logFilePath);
-                        await SaveLogEntryAsync(log, Path.Combine(TargetDirectoryPaths, "log.txt"));
-                    },
-                    (done, total) =>
+                    try
                     {
-                        Application.Current.Dispatcher.InvokeAsync(() => ProgressValue = total == 0 ? 0 : done * 100 / total);
-                    },
-                    appVersionInfo);
+                        await ImageConverterUtil.ConvertBmpToPngAsync(
+                            targetPath, // 分割した単一パスを渡す
+                            IsDeleteOriginalFilesEnabled,
+                            async log =>
+                            {
+                                // UIスレッドでログ更新
+                                await Application.Current.Dispatcher.InvokeAsync(() =>
+                                {
+                                    stringBuilder.AppendLine(log);
+                                    LogText = stringBuilder.ToString();
+                                });
+
+                                // アプリ共通ログ & 対象フォルダ配下ログに出力
+                                await SaveLogEntryAsync(log, appLogFilePath);
+                                await SaveLogEntryAsync(log, Path.Combine(targetPath, "log.txt"));
+                            },
+                            (done, total) =>
+                            {
+                                // 進捗率の更新 (各フォルダごと 0〜100% の場合)
+                                Application.Current.Dispatcher.InvokeAsync(() =>
+                                {
+                                    ProgressValue = total == 0 ? 0 : done * 100 / total;
+                                });
+                            },
+                            appVersionInfo);
+                    }
+                    catch (Exception ex)
+                    {
+                        // 1つのフォルダで予期せぬ例外が発生しても後続のフォルダ処理を継続する
+                        var errorMsg = $"[エラー] 処理失敗 ({targetPath}): {ex.Message}";
+                        await Application.Current.Dispatcher.InvokeAsync(() =>
+                        {
+                            stringBuilder.AppendLine(errorMsg);
+                            LogText = stringBuilder.ToString();
+                        });
+                        await SaveLogEntryAsync(errorMsg, appLogFilePath);
+                    }
+                }
             }
             finally
             {
