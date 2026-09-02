@@ -74,9 +74,13 @@ namespace ImageShifter.ViewModels
             {
                 var baseDirectoryPath = AppDomain.CurrentDomain.BaseDirectory;
                 var appLogFilePath = Path.Combine(baseDirectoryPath, "log.txt");
+                var index = 0;
 
                 foreach (var targetPath in paths)
                 {
+                    var currentInfo = $"[{++index}/{paths.Length}] {targetPath}";
+                    await SaveLogEntryAsync(currentInfo, appLogFilePath);
+
                     // 存在しないディレクトリのガード
                     if (!Directory.Exists(targetPath))
                     {
